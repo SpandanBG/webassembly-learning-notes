@@ -60,7 +60,9 @@ Form the above `simple.wat` source code we know that the module takes in a funct
 ```javascript
 const importObject = {
     import: {
-        import_func: args => (document.getElementById("root").innerHTML = args)
+        import_func: args => {
+            document.getElementById("root").innerHTML = args;
+        }
     }
 };
 ```
@@ -84,5 +86,37 @@ To execute the `simple.wasm` file in a streaming way:
 WebAssembly.instantiateStreaming(fetch('simple.was'), importObject)
     .then(obj => obj.instance.exports.export_func();)
 ```
+
+---
+
+## Memory Of WASM
+
+Each WebAssembly Module has it's own linear module that can be read and written into. This memory buffer can be accessed by pointers. This memory buffer is created in a blocks of `64 kb` and can be created using Javascript as such:
+
+```javascript
+var memory = new WebAssembly.Memory({ initial: 10, maximum: 100 });
+```
+
+This will create an initial memory buffer of `(64 * 10) kb = 640 kb` and reserve a memory for `6.4 mb`.
+
+WebAssembly exposes it's memory by providing a buffer getter/setter that returns an ArrayBuffer.
+
+```javascript
+// Writing 42 to buffer:
+new Uint32Array(memory.buffer)[0] = 42;
+
+// Getting value from buffer:
+const fortyTwo = new UnitArray(memory.buffer)[0];
+```
+
+The memory instance can be grown by calling `Memory.prototype.grow()`. It takes units as parameter that grows the memory by `64 * supplied_unit kb`. For example:
+
+```javascript
+memory.grow(1);
+```
+
+If growth of memory more than the max limit is attempted, it would result in `WebAssembly.RangeError`. **Note**, since `ArrayBuffer` is of immutable type, growing the size of memory results in new `ArrayBuffer` object being returned, and the previous buffer is detached.
+
+The linear memory can be defined inside the WebAssembly module or can be imported, and the memory can also be exported. You can import the __memory buffer from WebAssembly in Javascript__ by calling the `Instance.prototypes.exports`. Similarly, __memory can be created in Javascript by `WebAssembly.memory` and passed to the WebAssembly module as import__.
 
 ---
