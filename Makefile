@@ -9,3 +9,9 @@ memory-wasm:
 
 serve-memory:
 	http-server memory
+
+table-wasm:
+	wat2wasm table/table.wat -o table/table.wasm
+
+serve-table:
+	http-server table

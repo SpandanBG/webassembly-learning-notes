@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Simple wat 2 wasm</title>
+    </head>
+    <body>
+        <div id="root1"></div>
+        <div id="root2"></div>
+        <script>
+            WebAssembly.instantiateStreaming(fetch("table.wasm")).then(res => {
+                const tbl = res.instance.exports.tbl;
+                document.getElementById("root1").innerHTML = tbl.get(0)();
+                document.getElementById("root2").innerHTML = tbl.get(1)();
+            });
+        </script>
+    </body>
+</html>
