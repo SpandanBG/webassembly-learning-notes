@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Simple wat 2 wasm</title>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+            var memory = new WebAssembly.Memory({ initial: 10, maximum: 100 });
+            WebAssembly.instantiateStreaming(fetch("memory.wasm"), {
+                js: { mem: memory }
+            }).then(res => {
+                const i32 = new Uint32Array(memory.buffer);
+                [...Array(10).keys()].map((v, i) => i32[i] = v + 1);
+                const sum = res.instance.exports.accumulate(0, 10);
+                document.getElementById("root").innerHTML = sum;
+            });
+        </script>
+    </body>
+</html>
