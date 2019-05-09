@@ -125,3 +125,54 @@ The linear memory can be defined inside the WebAssembly module or can be importe
 -   It can shared between module instances, which can be a critical building block for implementing dynamic linking in WebAssembly.
 
 ---
+
+## Memory Example
+
+Let's make a wasm module that imports a memory buffer with numbers in them and then computes and returns the sum of the numbers when a function named as accumulate is called. The `memory.wat` file will be as such:
+
+```wat
+(module
+    (memory (import "js" "mem") 1)
+    (func (export "accumulate") (param $ptr i32) (param $len i32) (result i32)
+        (local $end i32)
+        (local $sum i32)
+        (set_local $end (i32.add (get_local $ptr) (i32.mul (get_local $len) (i32.const 4))))
+        (block $break (loop $top
+            (br_if $break (i32.eq (get_local $ptr) (get_local $end)))
+            (set_local $sum (i32.add (get_local $sum) (i32.load (get_local $ptr))))
+            (set_local $ptr (i32.add (get_local $ptr) (i32.const 4)))
+            (br $top)
+        ))
+        (get_local $sum)
+    )
+)
+```
+
+Here we import the memory from the `mem` attribute of the `js` object in the line `(memory (import "js" "mem") 1)`. Then we export a function `accumulate` that takes in two parameter: `(param $ptr i32)` the starting of the memory index, `(param $len i32)` the total length of the array to traverse. It then creates an end index by `(local $end i32)` and instantiate it to the end memory location by `(set_local $end (i32.add (get_local $ptr) (i32.mul (get_local $len) (i32.const 4) ) ))`. Then it starts looping from `(block $break (loop $top /*...*/))`. First it checks if the `$ptr` has reached `$end` and breaks if it does by `(br_if $break (i32.eq (get_local $ptr) (get_local $end) ))`. Then it sets the value of `$sum` as `$sum` + value at `$ptr`, by `(set_local $sum (i32.add (get_local $sum) (i32.load (get_local $ptr))))`. And the moved to the next pointer by `(set_local $ptr (i32.add (get_local $ptr) (i32.const 4)))`. At the end, it return the value of `$sum` by `(get_local $sum)`. This is fairly the program flow of the `memory.wasm` code.
+
+Let us look at the Javascript to code to understand how to put the memory to the module and get the sum of the array using the `accumulate` function created above.
+
+```javascript
+// Create a memory buffer of 640kb inital and 6.4mb maximum
+const memory = new WebAssembly.Memory({ initial: 10, maximum: 100 });
+
+// Fetch and compile `memory.wasm` file and pass the memory buffer
+WebAssembly.instantiateStreaming(fetch("memory.wasm"), {
+    js: { mem: memory }
+}).then(res => {
+    // Get the memory buffer as an unsigned 32 bit integer array
+    const i32 = new Uint32Array(memory.buffer);
+
+    // Fille the array with values from 1 to 10
+    [...Array(10).keys()].map((v, i) => (i32[i] = v + 1));
+
+    // Get and display the sum of the array by calling
+    // the accumulate function of the module
+    const sum = res.instance.exports.accumulate(0, 10);
+    console.log(sum);
+});
+```
+
+**NOTE**: We are getting the `memory.buffer` as a `Uint32Array` view and not the memory itself.
+
+---
