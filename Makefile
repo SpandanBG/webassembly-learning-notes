@@ -1,5 +1,5 @@
-make-wasm: simple.wat
-	wat2wasm simple.wat -o simple.wasm
+make-simple:
+	wat2wasm simple/simple.wat -o simple/simple.wasm
 
-serve:
-	http-server
+serve-simple:
+	http-server simple
