@@ -216,3 +216,18 @@ WebAssembly.instantiateStreaming(fetch("table.wasm")).then(res => {
 ```
 
 ---
+
+# Global In WASM
+
+WebAssembly gives an ability to create a global variable shared between both Javascript and WebAssembly module instances. This is useful for dynamic linking. To create a global variable:
+
+```javascript
+const global = new WebAssembly.Global({ value: "i32", mutable: true }, 0);
+```
+
+Here the `WebAssembly.Global` API takes two parameters.
+
+-   First is the object `{value: "i32", mutable: true}` which states the _datatype as integer of 32 bits_ and _that it is mutable_.
+-   Second is the actual value, which here is initialized to `0`.
+
+---
