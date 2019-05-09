@@ -182,3 +182,37 @@ WebAssembly.instantiateStreaming(fetch("memory.wasm"), {
 A WebAssembly table is a typed array that can be accessed by both Javascript and WebAssembly code. This array currently only is capable of holding references of functions. The table can be mutated by calling the `Table.prototype.set()` which updates on the values in the table. The table can be grown by `Table.prototype.grow()` which increased the size of the table. The values are accessible by `Table.prototype.get()`.
 
 ---
+
+## Table Example
+
+Let us write a WAT file that creates two functions, one returns 13 and the other returns 42; and export a table that contains the pointers to those functions.
+
+```wat
+(module
+    (func $thirteen (result i32) (i32.const 13))
+    (func $forty_two (result i32) (i32.const 43))
+    (table (export "tbl") anyfunc (elem $thirteen $forty_two))
+)
+```
+
+Here `(table (export "tbl") anyfunc (elem $thirteen $forty_two))` we have stated that `thirteen` as the first element and `forty_two` as the second.
+
+Let us create the Javascript code to get and execute the functions defined above.
+
+```javascript
+WebAssembly.instantiateStreaming(fetch("table.wasm")).then(res => {
+    // Get the table from the module
+    const tbl = res.instance.exports.tbl;
+
+    // Get and execute the first function on the table
+    // which is the `thirteen` function
+    // logs: 13
+    console.log(tbl.get(0)());
+
+    // Get and execute the second (`forty_two`) function on the table
+    // logs: 42
+    console.log(tbl.get(1)());
+});
+```
+
+---
