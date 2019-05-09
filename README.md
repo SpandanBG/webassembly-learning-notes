@@ -231,3 +231,49 @@ Here the `WebAssembly.Global` API takes two parameters.
 -   Second is the actual value, which here is initialized to `0`.
 
 ---
+
+## Global Example
+
+Let us write the WAT code that imports a global variable from the `global` attribute of `js` object and exports two functions: `get_global` and `inc_global` to get and increment global by one.
+
+```wat
+(module
+    (global $g (import "js" "global") (mut i32))
+    (func (export "get_global") (result i32)
+        (get_global $g)
+    )
+    (func (export "inc_global")
+        (set_global $g
+            (i32.add (get_global $g) (i32.const 1) )
+        )
+    )
+)
+```
+
+Then let us write the Javascript code to create, supply, modify and extract the global variable.
+
+```javascript
+// Create a global variable of type i32
+// and mutable with 0 as initial value
+const gbl = new WebAssembly.Global({ value: "i32", mutable: true }, 0);
+
+// Fetch `global.wasm` file and put the global variable to it.
+WebAssembly.instantiateStreaming(fetch("global.wasm"), {
+    js: { global: gbl }
+}).then(({ instance }) => {
+    // Display the original value: 0
+    console.log(instance.exports.get_global());
+
+    // Change the global value from javascript to
+    gbl.value = 42;
+
+    // Display the changed value by fetching value form wasm: 42
+    console.log(instance.exports.get_global());
+
+    // Increment the global value by one in wasm
+    instance.exports.inc_global();
+
+    // Display the global value by extraction in js: 43
+    console.log(gbl.value);
+});
+```

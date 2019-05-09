@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Simple wat 2 wasm</title>
+    </head>
+    <body>
+        <div id="root1"></div>
+        <div id="root2"></div>
+        <div id="root3"></div>
+        <script>
+            const gbl = new WebAssembly.Global(
+                { value: "i32", mutable: true },
+                0
+            );
+            WebAssembly.instantiateStreaming(fetch("global.wasm"), {
+                js: { global: gbl }
+            }).then(({ instance }) => {
+                document.getElementById(
+                    "root1"
+                ).innerHTML = instance.exports.get_global();
+                gbl.value = 42;
+                document.getElementById(
+                    "root2"
+                ).innerHTML = instance.exports.get_global();
+                instance.exports.inc_global();
+                document.getElementById("root3").innerHTML = gbl.value;
+            });
+        </script>
+    </body>
+</html>

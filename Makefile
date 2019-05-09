@@ -15,3 +15,9 @@ table-wasm:
 
 serve-table:
 	http-server table
+
+global-wasm:
+	wat2wasm global/global.wat -o global/global.wasm
+
+serve-global:
+	http-server global
