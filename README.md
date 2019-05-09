@@ -176,3 +176,9 @@ WebAssembly.instantiateStreaming(fetch("memory.wasm"), {
 **NOTE**: We are getting the `memory.buffer` as a `Uint32Array` view and not the memory itself.
 
 ---
+
+## Table In WASM
+
+A WebAssembly table is a typed array that can be accessed by both Javascript and WebAssembly code. This array currently only is capable of holding references of functions. The table can be mutated by calling the `Table.prototype.set()` which updates on the values in the table. The table can be grown by `Table.prototype.grow()` which increased the size of the table. The values are accessible by `Table.prototype.get()`.
+
+---
