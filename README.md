@@ -117,6 +117,11 @@ memory.grow(1);
 
 If growth of memory more than the max limit is attempted, it would result in `WebAssembly.RangeError`. **Note**, since `ArrayBuffer` is of immutable type, growing the size of memory results in new `ArrayBuffer` object being returned, and the previous buffer is detached.
 
-The linear memory can be defined inside the WebAssembly module or can be imported, and the memory can also be exported. You can import the __memory buffer from WebAssembly in Javascript__ by calling the `Instance.prototypes.exports`. Similarly, __memory can be created in Javascript by `WebAssembly.memory` and passed to the WebAssembly module as import__.
+The linear memory can be defined inside the WebAssembly module or can be imported, and the memory can also be exported. You can import the **memory buffer from WebAssembly in Javascript** by calling the `Instance.prototypes.exports`. Similarly, **memory can be created in Javascript by `WebAssembly.memory` and passed to the WebAssembly module as import**.
+
+#### Memory imports are useful for two reasons:
+
+-   It allows JS to fetch and create initial contents of the memory before or concurrently with module compilation.
+-   It can shared between module instances, which can be a critical building block for implementing dynamic linking in WebAssembly.
 
 ---
